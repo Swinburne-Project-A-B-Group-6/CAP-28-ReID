@@ -82,16 +82,7 @@ function findIdentity(globalId) {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-sm">
-              <tr
-                v-for="log in visibleEventLogs"
-                :key="log.id"
-                @click="log.globalId && (selectedGlobalId = log.globalId)"
-                :class="{
-                  'cursor-pointer': log.globalId,
-                  'hover:bg-slate-50/80': log.globalId && selectedGlobalId !== log.globalId,
-                  'bg-blue-100 hover:bg-blue-100': selectedGlobalId === log.globalId
-                }"
-              >
+              <tr v-for="log in visibleEventLogs" :key="log.id">
                 <td class="py-3 pl-5 pr-3 font-mono text-slate-700 whitespace-nowrap align-top">
                   {{ log.timestamp }}
                 </td>
