@@ -1,43 +1,49 @@
 export const identities = [
   {
     globalId: 1,
-    attributes: ['Long Sleeves', 'Light Pants'],
     history: [
-      { cameraId: 'CAM-01', localId: 2, enterTime: '00:00', exitTime: '00:23' },
-      { cameraId: 'CAM-02', localId: 16, enterTime: '00:08' },
-      { cameraId: 'CAM-03', localId: 10, enterTime: '00:12' }
+      { cameraId: 'CAM-01', start: 0, end: 24.08 },
+      { cameraId: 'CAM-02', start: 0, end: 18.68 },
+      { cameraId: 'CAM-03', start: 0, end: 3.92 },
+      { cameraId: 'CAM-03', start: 4.76, end: 18.2 }
     ]
   },
   {
     globalId: 2,
-    attributes: ['Long Sleeves', 'Light Pants'],
     history: [
-      { cameraId: 'CAM-02', localId: 2, enterTime: '00:01' },
-      { cameraId: 'CAM-03', localId: 9, enterTime: '00:06' },
-      { cameraId: 'CAM-01', localId: 16, enterTime: '00:15' }
+      { cameraId: 'CAM-02', start: 0, end: 22.76 },
+      { cameraId: 'CAM-03', start: 0, end: 3.2 },
+      { cameraId: 'CAM-03', start: 3.8, end: 8.84 },
+      { cameraId: 'CAM-01', start: 14.96, end: 25 },
+      { cameraId: 'CAM-03', start: 22.88, end: 25 },
+      { cameraId: 'CAM-02', start: 23.36, end: 25 }
     ]
   },
   {
     globalId: 3,
-    attributes: ['Long Sleeves', 'Dark Pants'],
     history: [
-      { cameraId: 'CAM-02', localId: 22, enterTime: '00:09' },
-      { cameraId: 'CAM-03', localId: 24, enterTime: '00:14' },
-      { cameraId: 'CAM-01', localId: 25, enterTime: '00:18' }
+      { cameraId: 'CAM-02', start: 14.84, end: 25 },
+      { cameraId: 'CAM-03', start: 16.4, end: 25 },
+      { cameraId: 'CAM-01', start: 19.88, end: 25 }
     ]
   }
 ]
 
 export const eventLogs = [
-  { id: 'EVT-10', timestamp: '00:23', camera: 'CAM-01', localId: 2, globalId: 1, eventType: 'EXITED' },
-  { id: 'EVT-09', timestamp: '00:18', camera: 'CAM-01', localId: 25, globalId: 3, eventType: 'RE_IDENTIFIED', confidence: 86 },
-  { id: 'EVT-08', timestamp: '00:15', camera: 'CAM-01', localId: 16, globalId: 2, eventType: 'RE_IDENTIFIED', confidence: 88 },
-  { id: 'EVT-07', timestamp: '00:14', camera: 'CAM-03', localId: 24, globalId: 3, eventType: 'RE_IDENTIFIED', confidence: 82 },
-  { id: 'EVT-06', timestamp: '00:12', camera: 'CAM-03', localId: 10, globalId: 1, eventType: 'RE_IDENTIFIED', confidence: 91 },
-  { id: 'EVT-05', timestamp: '00:10', camera: 'CAM-03', localId: 15, globalId: null, eventType: 'LOW_CONFIDENCE', confidence: 64, attributes: ['Unknown'] },
-  { id: 'EVT-04', timestamp: '00:09', camera: 'CAM-02', localId: 22, globalId: 3, eventType: 'NEW_PERSON' },
-  { id: 'EVT-03', timestamp: '00:08', camera: 'CAM-02', localId: 16, globalId: 1, eventType: 'RE_IDENTIFIED', confidence: 89 },
-  { id: 'EVT-02', timestamp: '00:06', camera: 'CAM-03', localId: 9, globalId: 2, eventType: 'RE_IDENTIFIED', confidence: 84 },
-  { id: 'EVT-01', timestamp: '00:01', camera: 'CAM-02', localId: 2, globalId: 2, eventType: 'NEW_PERSON' },
-  { id: 'EVT-00', timestamp: '00:00', camera: 'CAM-01', localId: 2, globalId: 1, eventType: 'NEW_PERSON' }
+  { id: '0:1', globalId: 1, cameraId: 'CAM-01', status: 'New Person', time: 0 },
+  { id: '2:1', globalId: 1, cameraId: 'CAM-02', status: 'Re-identified', time: 0.4 },
+  { id: '4:1', globalId: 1, cameraId: 'CAM-03', status: 'Re-identified', time: 0.8 },
+  { id: '0:2', globalId: 2, cameraId: 'CAM-02', status: 'New Person', time: 1.2 },
+  { id: '2:2', globalId: 2, cameraId: 'CAM-03', status: 'Re-identified', time: 1.6 },
+  { id: '3:2', globalId: 2, cameraId: 'CAM-03', status: 'Exited', time: 3.2 },
+  { id: '5:1', globalId: 1, cameraId: 'CAM-03', status: 'Exited', time: 3.92 },
+  { id: '4:2', globalId: 2, cameraId: 'CAM-03', status: 'Exited', time: 8.84 },
+  { id: '0:3', globalId: 3, cameraId: 'CAM-02', status: 'New Person', time: 14.84 },
+  { id: '5:2', globalId: 2, cameraId: 'CAM-01', status: 'Re-identified', time: 14.96 },
+  { id: '1:3', globalId: 3, cameraId: 'CAM-03', status: 'Re-identified', time: 16.4 },
+  { id: '6:1', globalId: 1, cameraId: 'CAM-03', status: 'Exited', time: 18.2 },
+  { id: '3:1', globalId: 1, cameraId: 'CAM-02', status: 'Exited', time: 18.68 },
+  { id: '2:3', globalId: 3, cameraId: 'CAM-01', status: 'Re-identified', time: 19.88 },
+  { id: '1:2', globalId: 2, cameraId: 'CAM-02', status: 'Exited', time: 22.76 },
+  { id: '1:1', globalId: 1, cameraId: 'CAM-01', status: 'Exited', time: 24.08 }
 ]
