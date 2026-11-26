@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps({
   session: { type: Object, required: true },
-  selectedId: { type: String, default: null }
+  selectedIds: { type: Set, required: true }
 })
 const emit = defineEmits(['frame'])
 
@@ -11,20 +11,32 @@ const { cameras, fps, tracks } = props.session
 const videos = []
 const frameCallbacks = []
 const frameIndexes = ref(cameras.map(() => null))
+const cameraSubjectIds = cameras.map(({ id }) => Object.keys(tracks[id]))
 
-const selectedBoxes = computed(() => cameras.map((camera, index) => {
+const visibleBoxes = computed(() => cameras.map((camera, index) => {
   const frame = frameIndexes.value[index]
-  const box = tracks[camera.id][props.selectedId]?.[frame]
-  if (!Array.isArray(box) || box.length !== 4) return null
+  if (frame === null) return []
 
   const { width, height } = camera
-  const [left, top, right, bottom] = box
-  return {
-    left: `${left / width * 100}%`,
-    top: `${top / height * 100}%`,
-    width: `${(right - left) / width * 100}%`,
-    height: `${(bottom - top) / height * 100}%`
+  const cameraTracks = tracks[camera.id]
+  const ids = props.selectedIds.size ? props.selectedIds : cameraSubjectIds[index]
+  const boxes = []
+  for (const id of ids) {
+    const box = cameraTracks[id]?.[frame]
+    if (!Array.isArray(box) || box.length !== 4) continue
+
+    const [left, top, right, bottom] = box
+    boxes.push({
+      id,
+      style: {
+        left: `${left / width * 100}%`,
+        top: `${top / height * 100}%`,
+        width: `${(right - left) / width * 100}%`,
+        height: `${(bottom - top) / height * 100}%`
+      }
+    })
   }
+  return boxes
 }))
 
 onMounted(() => {
@@ -80,12 +92,13 @@ function synchronizePlayback(time) {
             playsinline
           ></video>
           <div
-            v-if="selectedBoxes[index]"
+            v-for="box in visibleBoxes[index]"
+            :key="box.id"
             class="box"
-            :style="selectedBoxes[index]"
+            :style="box.style"
             aria-hidden="true"
           >
-            <span>ID {{ selectedId }}</span>
+            <span>ID {{ box.id }}</span>
           </div>
         </div>
       </figure>

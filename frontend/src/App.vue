@@ -1,42 +1,49 @@
 <script setup>
 import { computed, ref, shallowRef, watch } from 'vue'
 import CameraFeeds from './components/CameraFeeds.vue'
+import TrackingEvents from './components/TrackingEvents.vue'
 
 const videoExtension = /\.(avi|mp4|mov|mkv|webm|m4v|mpg|mpeg|wmv|mts|m2ts)$/i
 
 const session = shallowRef(null)
 const sessionVersion = ref(0)
 const frame = ref(0)
-const selectedId = ref(null)
+const selectedIds = ref(new Set())
 const subjectSlots = shallowRef([])
 const loading = ref(false)
 const error = ref('')
 
+const trackingGraceFrames = computed(() => Math.round((session.value?.fps ?? 0) / 2))
+
 const activeSubjects = computed((previous) => {
-  const subjects = new Map()
+  const subjects = new Set()
   if (!session.value) return subjects
 
-  const { cameras, fps, tracks } = session.value
+  const { cameras, tracks } = session.value
   const lastFrame = frame.value
-  const firstFrame = Math.max(0, lastFrame - Math.round(fps / 2))
+  const firstFrame = Math.max(0, lastFrame - trackingGraceFrames.value)
   for (const { id } of cameras) {
     for (const [globalId, boxes] of Object.entries(tracks[id])) {
+      if (subjects.has(globalId)) continue
       for (let index = lastFrame; index >= firstFrame; index--) {
         if (!boxes[index]) continue
-        const earlier = subjects.get(globalId)
-        subjects.set(globalId, earlier ? `${earlier}, ${id}` : id)
+        subjects.add(globalId)
         break
       }
     }
   }
 
   if (previous?.size === subjects.size &&
-      [...subjects].every(([id, cameras]) => previous.get(id) === cameras)) return previous
+      [...subjects].every((id) => previous.has(id))) return previous
   return subjects
 })
 
 watch([session, activeSubjects], ([, subjects]) => {
-  const remaining = new Set([...subjects.keys()].sort((a, b) => Number(a) - Number(b)))
+  for (const id of selectedIds.value) {
+    if (!subjects.has(id)) selectedIds.value.delete(id)
+  }
+
+  const remaining = new Set([...subjects].sort((a, b) => Number(a) - Number(b)))
   const previous = subjectSlots.value
   const slots = previous.map((id) => remaining.delete(id) ? id : null)
   for (const id of remaining) {
@@ -50,6 +57,10 @@ watch([session, activeSubjects], ([, subjects]) => {
     subjectSlots.value = slots
   }
 })
+
+function toggleSubject(id) {
+  if (!selectedIds.value.delete(id)) selectedIds.value.add(id)
+}
 
 async function openSession(event) {
   const files = [...event.target.files]
@@ -81,7 +92,7 @@ async function openSession(event) {
     session.value = result
     sessionVersion.value++
     frame.value = 0
-    selectedId.value = null
+    selectedIds.value.clear()
   } catch (cause) {
     error.value = cause.message
   } finally {
@@ -107,13 +118,13 @@ async function openSession(event) {
       <CameraFeeds
         :key="sessionVersion"
         :session="session"
-        :selected-id="selectedId"
+        :selected-ids="selectedIds"
         @frame="frame = $event"
       />
       <section aria-labelledby="active-subjects">
         <header>
           <h2 id="active-subjects">Active Subjects</h2>
-          <button type="button" :disabled="!selectedId" @click="selectedId = null">Clear selection</button>
+          <button type="button" :disabled="!selectedIds.size" @click="selectedIds.clear()">Clear selection</button>
         </header>
         <div class="subjects">
           <p v-if="!activeSubjects.size" class="subjects-empty">No active subjects</p>
@@ -122,15 +133,15 @@ async function openSession(event) {
               v-if="id !== null"
               :key="id"
               type="button"
-              :aria-pressed="selectedId === id"
-              @click="selectedId = id"
+              :aria-pressed="selectedIds.has(id)"
+              @click="toggleSubject(id)"
             >
-              <strong>Global ID {{ id }}</strong>
-              <small>{{ activeSubjects.get(id) }}</small>
+              <strong>ID {{ id }}</strong>
             </button>
           </div>
         </div>
       </section>
+      <TrackingEvents :session="session" :frame="frame" :grace-frames="trackingGraceFrames" />
     </template>
   </main>
 </template>
