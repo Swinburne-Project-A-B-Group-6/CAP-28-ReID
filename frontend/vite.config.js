@@ -1,16 +1,10 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
+import { reidServer } from './reidServer.js'
 
 export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
+  plugins: [vue(), reidServer()],
   server: {
-    port: 5173,
-    host: true
+    watch: { ignored: ['**/public/tracking.json', '**/public/.cap28-session-*.tmp'] }
   }
 })

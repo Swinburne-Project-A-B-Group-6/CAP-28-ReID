@@ -4,6 +4,51 @@
 **Project Category:** Research, Industry  
 **Location:** Hanoi
 
+## Run Re-ID on synchronized recordings
+
+The `AI/` pipeline takes the synchronized clips from one session. It uses
+YOLO11n to detect people, ByteTrack to assign local IDs in each camera, and
+OpenVINO's `person-reidentification-retail-0277` model to compare appearance
+across cameras. It writes browser-ready MP4 files and a separate tracking JSON
+with camera metadata and per-frame bounding boxes by Global ID.
+
+From the repository root, set up the CPU environment in PowerShell with Python 3.10.
+
+```powershell
+python -m venv AI/.venv
+$python = 'AI/.venv/Scripts/python.exe'
+& $python -m pip install --upgrade pip
+& $python -m pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
+& $python -m pip install -r AI/requirements.txt
+```
+
+Run the pipeline once with all three recordings. The first run downloads the
+model weights to `AI/models/` and exports the detector to OpenVINO for CPU runs.
+The videos should start at the same time and have
+the same duration. The pipeline transcodes them to 12 FPS by default.
+
+```powershell
+& $python AI/run_reid.py `
+  --camera 'CAM-01=D:/videos/cam1.mp4' `
+  --camera 'CAM-02=D:/videos/cam2.mp4' `
+  --camera 'CAM-03=D:/videos/cam3.mp4' `
+  --output AI/output/my-session
+```
+
+The command saves the videos to `AI/output/my-session/` and the tracking data
+to `AI/output/my-session.json`. Use `--tracking` to specify a different JSON path.
+
+Start the local dashboard with `npm.cmd --prefix frontend run dev` after installing
+the frontend and AI dependencies. Click **Open video folder** and choose the
+folder with synchronized camera videos. The dashboard runs the AI pipeline,
+plays the converted MP4s, and replaces `frontend/public/tracking.json` after a
+successful run. It assigns camera IDs in filename order. On a failed run it
+keeps the last successful tracking file. The local server is required for
+processing, including when testing a build with `npm.cmd --prefix frontend run preview`.
+
+The default Re-ID model and threshold are a baseline. Similar clothing and long occlusions
+can cause incorrect matches or split a person into multiple Global IDs.
+
 ---
 
 ## 1. Project Overview
